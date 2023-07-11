@@ -40,7 +40,7 @@ def setFlag():
     versionAdd(flagEntry)
     return flagEntry
 
-@app.route("/api/flag", methods = "GET")
+@app.route("/api/flag", methods = ["GET"])
 def getFlag():
     valType =request.args.get("type",default=None, type=str)
     key = request.args.get("key", default=None, type=str)
@@ -54,18 +54,18 @@ def getFlag():
     
     return "Flag not found", 500
 
-@app.route("/api/flags", methods = "GET")
+@app.route("/api/flags", methods = ["GET"])
 def getFlags():
     return flagList
 
-@app.route("/api/flag", methods= "DELETE")
+@app.route("/api/flag", methods= ["DELETE"])
 def deleteFlag():
     global flagList
     flagid = request.args.get("id", default = None, type=str)
     flagList =list(filter(lambda flag: flag["id"] != flagid, flagList))
     return flagList
 
-@app.route("/api/flag", methods = "PUT")
+@app.route("/api/flag", methods = ["PUT"])
 def updateFlag():
     flagEntry = request.json
     flagid = flagEntry["id"]
@@ -73,18 +73,21 @@ def updateFlag():
     for flag in flagList:
         if flag["id"] == flagid:
             for key in jsonKeys:
-                if key in item and key!="dateAdded":
+                if key in flag and key!="dateAdded":
                     flag[key] = flagEntry[key]
                 flag["lastModified"] = time.time()
-                versionAdd(flag)
-                return flag
+            versionAdd(flag)
+            return flag
     
     return "Flag not found", 500
 
-@app.route("/api/flaghistory", methods="PUT")
+@app.route("/api/flaghistory", methods=["GET"])
 def getHistory():
     id = request.args.get("id", default = None, type = "str")
     if id in flagVersions:
         return flagVersions[id]
     return "Flag not found", 500
 
+if __name__ == "__main__":
+    logging.info("Service Starting")
+    app.run(port=5050)
